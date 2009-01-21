@@ -1,0 +1,40 @@
+Translate
+=========
+
+This plugin provides a web interface for translating Rails I18n texts (requires Rails 2.2 or higher) from one locale to another. The plugin has been tested only with the simple I18n backend that ships with Rails. I18n texts are read from and written to YAML files under config/locales.
+
+To translate to a new locale you need to add a YAML file for that locale that contains the locale as the top key and contains at least one translation.
+
+Please note that there are certain I18n keys that map to Array objects rather than strings and those are currently not dealt with by the translation UI. That means that Rails built in keys such as date.day_names need to be translated manually directly in the YAML file.
+
+To get the translation UI to write the YAML files in UTF8 you need to install the ya2yaml gem.
+
+In order to find all I18n keys the translate UI extracts keys from I18n lookups in your application source code. In addition all :en and default locale keys from the I18n backend are listed for translation.
+
+Installation
+=========
+Obtain the sources with:
+
+./script/plugin install git://github.com/peter/translate.git
+
+To mount the plugin, add the following to your config/routes.rb file:
+
+Translate::Routes.translation_ui(map) if RAILS_ENV != "production"
+
+Now visit /translate in your web browser to start translating.
+
+Dependencies
+=========
+
+- Rails 2.2 or higher
+- The ya2yaml gem if you want your YAML files written in UTF8 encoding.
+
+Authors
+=========
+
+- Peter Marklund (programming)
+- Joakim Westerlund (web design)
+
+Many thanks to http://newsdesk.se for sponsoring the development of this plugin.
+
+Copyright (c) 2009 Peter Marklund, released under the MIT license
