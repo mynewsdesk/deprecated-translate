@@ -15,7 +15,7 @@ Installation
 =========
 Obtain the sources with:
 
-./script/plugin install git://github.com/peter/translate.git
+./script/plugin install git://github.com/newsdesk/translate.git 
 
 To mount the plugin, add the following to your config/routes.rb file:
 
