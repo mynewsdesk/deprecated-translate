@@ -2,7 +2,7 @@ class Translate::Storage
   attr_accessor :locale
   
   def initialize(locale)
-    self.locale = locale
+    self.locale = locale.to_sym
   end
   
   def write_to_file
