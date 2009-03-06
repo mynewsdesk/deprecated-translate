@@ -11,6 +11,9 @@ To get the translation UI to write the YAML files in UTF8 you need to install th
 
 The translation UI finds all I18n keys by extracting them from I18n lookups in your application source code. In addition it adds all :en and default locale keys from the I18n backend.
 
+- Updated: Each string in the UI now has an "Auto Translate" link which will send the original text to Google Translate and will input the returned translation into the form field for further clean up and review prior to saving.
+
+
 Rake Tasks
 =========
 

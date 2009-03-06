@@ -87,6 +87,8 @@
 		</p>
 		<p>
 		  <em>
+			  <%= link_to_function 'Auto Translate', "getGoogleTranslation('#{key}', \"#{escape_javascript(from_text)}\", '#{@from_locale}', '#{@to_locale}')", :style => 'padding: 0; margin: 0;' %>
+			  <br/>
 			  <strong>Key:</strong><%=h key %><br/>
 			  <% if @files[key] %>
 				  <strong>File:</strong><%= @files[key].join("<br/>") %>
