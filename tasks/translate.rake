@@ -30,7 +30,6 @@ class Hash
       end
     end
   end
-
 end
 
 namespace :translate do
@@ -83,5 +82,51 @@ namespace :translate do
       I18n.backend.store_translations(locale, new_translations[locale])
       Translate::Storage.new(locale).write_to_file
     end
+  end
+  
+  desc "Apply Google translate to auto translate all texts in locale ENV['FROM'] to locale ENV['TO']"
+  task :google => :environment do
+    raise "Please specify FROM and TO locales as environment variables" if ENV['FROM'].blank? || ENV['TO'].blank?
+
+    # Depends on httparty gem
+    # http://www.robbyonrails.com/articles/2009/03/16/httparty-goes-foreign
+    class GoogleApi
+      include HTTParty
+      base_uri 'ajax.googleapis.com'
+      def self.translate(string, to, from)
+        get("/ajax/services/language/translate",
+          :query => {:langpair => "#{from}|#{to}", :q => string, :v => 1.0},
+          :format => :json)
+      end
+    end
+
+    I18n.backend.send(:init_translations)
+
+    translations = {}
+    Translate::Keys.new.i18n_keys(ENV['FROM']).each do |key|
+      from_text = I18n.backend.send(:lookup, ENV['FROM'], key)
+      to_text = I18n.backend.send(:lookup, ENV['TO'], key)
+      if !from_text.blank? && to_text.blank?
+        print "#{key}: '#{from_text[0, 40]}' => "
+        if !translations[from_text]
+          response = GoogleApi.translate(from_text, ENV['TO'], ENV['FROM'])
+          translations[from_text] = response["responseData"] && response["responseData"]["translatedText"]
+        end
+        if !(translation = translations[from_text]).blank?
+          translation.gsub!(/\(\(([a-z_.]+)\)\)/i, '{{\1}}')
+          # Google translate sometimes replaces {{foobar}} with (()) foobar. We skip these
+          if translation !~ /\(\(\)\)/
+            puts "'#{translation[0, 40]}'"
+            I18n.backend.store_translations(ENV['TO'].to_sym, Translate::Keys.to_deep_hash({key => translation}))
+          else
+            puts "SKIPPING since interpolations were messed up: '#{translation[0,40]}'"
+          end
+        else
+          puts "NO TRANSLATION - #{response.inspect}"
+        end
+      end
+    end
+    
+    Translate::Storage.new(ENV['TO'].to_sym).write_to_file
   end
 end
