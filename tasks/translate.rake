@@ -94,9 +94,17 @@ namespace :translate do
       include HTTParty
       base_uri 'ajax.googleapis.com'
       def self.translate(string, to, from)
-        get("/ajax/services/language/translate",
-          :query => {:langpair => "#{from}|#{to}", :q => string, :v => 1.0},
-          :format => :json)
+        tries = 0
+        begin
+          get("/ajax/services/language/translate",
+            :query => {:langpair => "#{from}|#{to}", :q => string, :v => 1.0},
+            :format => :json)
+        rescue 
+          tries += 1
+          puts("SLEEPING - retrying in 5...")
+          sleep(5)
+          retry if tries < 10
+        end
       end
     end
 
@@ -104,7 +112,7 @@ namespace :translate do
 
     translations = {}
     Translate::Keys.new.i18n_keys(ENV['FROM']).each do |key|
-      from_text = I18n.backend.send(:lookup, ENV['FROM'], key)
+      from_text = I18n.backend.send(:lookup, ENV['FROM'], key).to_s
       to_text = I18n.backend.send(:lookup, ENV['TO'], key)
       if !from_text.blank? && to_text.blank?
         print "#{key}: '#{from_text[0, 40]}' => "
