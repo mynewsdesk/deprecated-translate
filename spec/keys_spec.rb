@@ -9,7 +9,7 @@ describe Translate::Keys do
   describe "to_a" do
     it "extracts keys from I18n lookups in .rb, .html.erb, and .rhtml files" do
       @keys.to_a.map(&:to_s).sort.should == ['article.key1', 'article.key2', 'article.key3', 'article.key4', 'article.key5',
-        'category_erb.key1', 'category_html_erb.key1', 'category_rhtml.key1']
+        'category_erb.key1', 'category_html_erb.key1', 'category_rhtml.key1', 'js.alert']
     end
   end
   
