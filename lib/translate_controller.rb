@@ -28,8 +28,10 @@ class TranslateController < ActionController::Base
   def initialize_keys
     translate_keys = Translate::Keys.new
     @files = translate_keys.files
-    @keys = (@files.keys.map(&:to_s) +
-      [:en, default_locale].uniq.map { |locale| translate_keys.i18n_keys(locale) }.flatten).uniq    
+    @keys = (@files.keys.map(&:to_s) + translate_keys.i18n_keys(@from_locale)).uniq    
+    @keys.reject! do |key|
+        !lookup(@from_locale, key).present?
+    end if @from_locale != @to_locale
   end
 
   def remove_hash_keys

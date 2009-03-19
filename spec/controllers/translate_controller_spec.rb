@@ -14,29 +14,30 @@ describe TranslateController do
       I18n.stub!(:default_locale).and_return(:sv)
     end
     
-    it "shows sorted paginated english keys from lookup and YAML files by default" do
+    it "shows sorted paginated keys from the translate from locale and extracted keys by default" do
       get_page :index
       assigns(:from_locale).should == :sv
       assigns(:to_locale).should == :en
       assigns(:files).should == files
+      assigns(:keys).sort.should == ['articles.new.page_title', 'home.page_title', 'vendor.foobar']
       assigns(:paginated_keys).should == ['articles.new.page_title']
     end
 
     it "can be paginated with the page param" do
-      get_page :index, :page => 3
+      get_page :index, :page => 2
       assigns(:files).should == files
       assigns(:paginated_keys).should == ['home.page_title']      
     end
     
     it "accepts a key_pattern param with key_type=starts_with" do
-      get_page :index, :key_pattern => 'general', :key_type => 'starts_with'
+      get_page :index, :key_pattern => 'articles', :key_type => 'starts_with'
       assigns(:files).should == files
-      assigns(:paginated_keys).should == ['general.back']
+      assigns(:paginated_keys).should == ['articles.new.page_title']
       assigns(:total_entries).should == 1
     end
 
     it "accepts a key_pattern param with key_type=contains" do
-      get_page :index, :key_pattern => 'page_title', :key_type => 'contains'
+      get_page :index, :key_pattern => 'page_', :key_type => 'contains'
       assigns(:files).should == files
       assigns(:total_entries).should == 2
       assigns(:paginated_keys).should == ['articles.new.page_title']
@@ -44,7 +45,7 @@ describe TranslateController do
 
     it "accepts a filter=untranslated param" do
       get_page :index, :filter => 'untranslated'
-      assigns(:total_entries).should == 3
+      assigns(:total_entries).should == 2
       assigns(:paginated_keys).should == ['articles.new.page_title']
     end
     
@@ -58,7 +59,20 @@ describe TranslateController do
       HashWithIndifferentAccess.new({
         :en => {
           :vendor => {
-            :foobar => "Foooo"
+            :foobar => "Foo Baar"
+          }
+        },
+        :sv => {
+          :articles => {
+            :new => {
+              :page_title => "Skapa ny artikel"
+            }
+          },
+          :home => {
+            :page_title => "Välkommen till I18n"
+          },
+          :vendor => {
+            :foobar => "Fobar"
           }
         }
       })
