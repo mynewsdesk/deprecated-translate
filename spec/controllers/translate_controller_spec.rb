@@ -89,17 +89,21 @@ describe TranslateController do
   
   describe "translate" do
     it "should store translations to I18n backend and then write them to a YAML file" do
-      I18n.backend.should_receive(:store_translations).with(:en, {
+      translations = {
         :articles => {
           :new => {
             :title => "New Article"
           }
         },
         :category => "Category"
-      })
+      }
+      I18n.backend.should_receive(:store_translations).with(:en, translations)
       storage = mock(:storage)
       storage.should_receive(:write_to_file)
       Translate::Storage.should_receive(:new).with(:en).and_return(storage)
+      log = mock(:log)
+      log.should_receive(:write_to_file)
+      Translate::Log.should_receive(:new).with(:sv, :en, translations).and_return(log)
       post :translate, "key" => {'articles.new.title' => "New Article", "category" => "Category"}
       response.should be_redirect
     end
