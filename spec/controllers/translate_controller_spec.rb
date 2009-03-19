@@ -56,7 +56,13 @@ describe TranslateController do
     end
     
     it "accepts a filter=changed param" do
+      log = mock(:log)
+      old_translations = {:home => {:page_title => "Skapar ny artikel"}}
+      log.should_receive(:read).and_return(Translate::File.deep_stringify_keys(old_translations))
+      Translate::Log.should_receive(:new).with(:sv, :en, {}).and_return(log)      
       get_page :index, :filter => 'changed'
+      assigns(:total_entries).should == 1
+      assigns(:keys).should == ["home.page_title"]
     end
 
     def i18n_translations

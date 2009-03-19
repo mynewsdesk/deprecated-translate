@@ -151,11 +151,14 @@ class TranslateController < ActionController::Base
   def old_from_text(key)
     return @old_from_text[key] if @old_from_text && @old_from_text[key]
     @old_from_text = {}
-    old_hash = Translate::Log.new(@from_locale, @to_locale, {}).read
-    text = key.split(".").inject(old_hash) do |hash, k|
+    text = key.split(".").inject(log_hash) do |hash, k|
       hash ? hash[k] : nil
     end
     @old_from_text[key] = text
   end
   helper_method :old_from_text
+  
+  def log_hash
+    @log_hash ||= Translate::Log.new(@from_locale, @to_locale, {}).read
+  end
 end
