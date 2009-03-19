@@ -1,12 +1,14 @@
 <%
   @page_title = "Translate"
+  show_filters = ["all", "untranslated", "translated"]
+  show_filters << "changed" if @from_locale != @to_locale
 %>
 
 <fieldset>
 	<legend>Search filter</legend>
 	<div id="show-sort">
 		<p>
-		 <label>Show:</label> <%=  simple_filter(["all", "untranslated", "translated"]) %>
+		 <label>Show:</label> <%=  simple_filter(show_filters) %>
 		</p>
 		<p>
 		 <label>Sort by:</label> <%= simple_filter(["key", "text"], 'sort_by') %>

@@ -10,17 +10,16 @@ class TranslateController < ActionController::Base
     remove_hash_keys
     filter_by_key_pattern
     filter_by_text_pattern
-    filter_by_translated
+    filter_by_translated_or_changed
     sort_keys
     paginate_keys
     @total_entries = @keys.size
   end
   
   def translate
-    translations = Translate::Keys.to_deep_hash(params[:key])
-    I18n.backend.store_translations(@to_locale, translations)
+    I18n.backend.store_translations(@to_locale, Translate::Keys.to_deep_hash(params[:key]))
     Translate::Storage.new(@to_locale).write_to_file
-    Translate::Log.new(@from_locale, @to_locale, translations).write_to_file
+    Translate::Log.new(@from_locale, @to_locale, params[:key].keys).write_to_file
     force_init_translations # Force reload from YAML file
     flash[:notice] = "Translations stored"
     redirect_to params.slice(:filter, :sort_by, :key_type, :key_pattern, :text_type, :text_pattern).merge({:action => :index})
@@ -49,7 +48,7 @@ class TranslateController < ActionController::Base
   end
   helper_method :lookup
   
-  def filter_by_translated
+  def filter_by_translated_or_changed
     params[:filter] ||= 'all'
     return if params[:filter] == 'all'
     @keys.reject! do |key|
@@ -58,6 +57,8 @@ class TranslateController < ActionController::Base
         lookup(@to_locale, key).present?
       when 'translated'
         lookup(@to_locale, key).blank?
+      when 'changed'
+        old_from_text(key).blank? || lookup(@from_locale, key) == old_from_text(key)
       else
         raise "Unknown filter '#{params[:filter]}'"
       end
@@ -146,4 +147,15 @@ class TranslateController < ActionController::Base
     @from_locale = session[:from_locale].to_sym
     @to_locale = session[:to_locale].to_sym
   end
+  
+  def old_from_text(key)
+    return @old_from_text[key] if @old_from_text && @old_from_text[key]
+    @old_from_text = {}
+    old_hash = Translate::Log.new(@from_locale, @to_locale, {}).read
+    text = key.split(".").inject(old_hash) do |hash, k|
+      hash ? hash[k] : nil
+    end
+    @old_from_text[key] = text
+  end
+  helper_method :old_from_text
 end

@@ -13,7 +13,7 @@ describe Translate::File do
     
     it "writes all I18n messages for a locale to YAML file" do
       @file.write(translations)
-      @file.read.should == @file.send(:deep_stringify_keys, translations)
+      @file.read.should == Translate::File.deep_stringify_keys(translations)
     end
 
     def translations
@@ -29,12 +29,8 @@ describe Translate::File do
   end
   
   describe "deep_stringify_keys" do
-    before(:each) do
-      @file = Translate::File.new(file_path)
-    end
-
     it "should convert all keys in a hash to strings" do
-      @file.send(:deep_stringify_keys, {
+      Translate::File.deep_stringify_keys({
         :en => {
           :article => {
             :title => "One Article"

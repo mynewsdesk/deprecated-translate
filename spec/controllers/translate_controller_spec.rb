@@ -54,6 +54,10 @@ describe TranslateController do
       assigns(:total_entries).should == 1
       assigns(:paginated_keys).should == ['vendor.foobar']
     end
+    
+    it "accepts a filter=changed param" do
+      get_page :index, :filter => 'changed'
+    end
 
     def i18n_translations
       HashWithIndifferentAccess.new({
@@ -97,14 +101,15 @@ describe TranslateController do
         },
         :category => "Category"
       }
+      key_param = {'articles.new.title' => "New Article", "category" => "Category"}
       I18n.backend.should_receive(:store_translations).with(:en, translations)
       storage = mock(:storage)
       storage.should_receive(:write_to_file)
       Translate::Storage.should_receive(:new).with(:en).and_return(storage)
       log = mock(:log)
       log.should_receive(:write_to_file)
-      Translate::Log.should_receive(:new).with(:sv, :en, translations).and_return(log)
-      post :translate, "key" => {'articles.new.title' => "New Article", "category" => "Category"}
+      Translate::Log.should_receive(:new).with(:sv, :en, key_param.keys).and_return(log)
+      post :translate, "key" => key_param
       response.should be_redirect
     end
   end
