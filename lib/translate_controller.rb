@@ -7,7 +7,6 @@ class TranslateController < ActionController::Base
   
   def index
     initialize_keys
-    remove_hash_keys
     filter_by_key_pattern
     filter_by_text_pattern
     filter_by_translated_or_changed
@@ -24,25 +23,22 @@ class TranslateController < ActionController::Base
     flash[:notice] = "Translations stored"
     redirect_to params.slice(:filter, :sort_by, :key_type, :key_pattern, :text_type, :text_pattern).merge({:action => :index})
   end
+
+  def reload
+    Translate::Keys.files = nil
+    redirect_to :action => 'index'
+  end
   
   private
   def initialize_keys
-    translate_keys = Translate::Keys.new
-    @files = translate_keys.files
-    @keys = (@files.keys.map(&:to_s) + translate_keys.i18n_keys(@from_locale)).uniq    
+    @files = Translate::Keys.files
+    @keys = (@files.keys.map(&:to_s) + Translate::Keys.new.i18n_keys(@from_locale)).uniq    
     @keys.reject! do |key|
-        !lookup(@from_locale, key).present?
+      from_text = lookup(@from_locale, key)
+      !from_text.present? || from_text.class != String
     end if @from_locale != @to_locale
   end
 
-  def remove_hash_keys
-    @keys.reject! do |key|
-      [@from_locale, @to_locale].any? do |locale|
-        lookup(:en, key).present? && lookup(:en, key).class != String
-      end
-    end
-  end
-  
   def lookup(locale, key)
     I18n.backend.send(:lookup, locale, key)
   end

@@ -1,6 +1,16 @@
 require 'pathname'
 
 class Translate::Keys
+  # Allows keys extracted from lookups in files to be cached
+  def self.files
+    @@files ||= Translate::Keys.new.files
+  end
+  
+  # Allows flushing of the files cache
+  def self.files=(files)
+    @@files = files
+  end
+  
   def files
     @files ||= extract_files
   end  

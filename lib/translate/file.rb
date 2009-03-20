@@ -15,7 +15,7 @@ class Translate::File
   end
   
   def read
-    YAML::load(IO.read(path))
+    File.exists?(path) ? YAML::load(IO.read(path)) : {}
   end
 
   # Stringifying keys for prettier YAML
