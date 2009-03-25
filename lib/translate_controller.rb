@@ -35,8 +35,8 @@ class TranslateController < ActionController::Base
     @keys = (@files.keys.map(&:to_s) + Translate::Keys.new.i18n_keys(@from_locale)).uniq    
     @keys.reject! do |key|
       from_text = lookup(@from_locale, key)
-      !from_text.present? || from_text.class != String
-    end if @from_locale != @to_locale
+      (@from_locale != @to_locale && !from_text.present?) || !from_text.is_a?(String)
+    end
   end
 
   def lookup(locale, key)
