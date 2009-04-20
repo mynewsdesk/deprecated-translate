@@ -38,7 +38,9 @@ class TranslateController < ActionController::Base
     @keys = (@files.keys.map(&:to_s) + Translate::Keys.new.i18n_keys(@from_locale)).uniq    
     @keys.reject! do |key|
       from_text = lookup(@from_locale, key)
-      (@from_locale != @to_locale && !from_text.present?) || !from_text.is_a?(String)
+      # When translating from one language to another, make sure there is a text to translate from.
+      # Always exclude non string translation objects as we don't support editing them in the UI.
+      (@from_locale != @to_locale && !from_text.present?) || (from_text.present? && !from_text.is_a?(String))      
     end
   end
 
