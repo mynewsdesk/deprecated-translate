@@ -11,10 +11,14 @@
       google.load("language", "1");
 
       function getGoogleTranslation(id, text, from_language, to_language) {
+        text = text.replace(/\{\{/, '__').replace(/\}\}/, '__')
         google.language.translate(text, from_language, to_language, function(result) {
-        if (!result.error) { 
-            Form.Element.setValue(id, result.translation.unescapeHTML());
-            }
+          if (!result.error) { 
+            result_text = result.translation.unescapeHTML().gsub(/__(.+)__/, function(match){
+              return '{{' + match[1] + '}}';
+            });
+            Form.Element.setValue(id, result_text);
+          }
         });
 
     }
