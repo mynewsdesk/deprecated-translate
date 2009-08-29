@@ -22,12 +22,15 @@ In addition to the web UI this plugin adds the following rake tasks:
 translate:lost_in_translation
 translate:merge_keys
 translate:google
+translate:changed
 
 The lost_in_translation task shows you any I18n keys in your code that are do not have translations in the YAML file for your default locale, i.e. config/locales/sv.yml.
 
 The merge_keys task is supposed to be used in conjunction with Sven Fuch's Rails I18n TextMate bundle (http://github.com/svenfuchs/rails-i18n/tree/master). Texts and keys extracted with the TextMate bundle end up in the temporary file log/translations.yml. When you run the merge_keys rake task the keys are moved over to the corresponding I18n locale file, i.e. config/locales/sv.yml. The merge_keys task also checks for overwrites of existing keys by warning you that one of your extracted keys already exists with a different translation.
 
 The google task is used for auto translating from one locale to another using Google Translate.
+
+The changed rake task can show you between one YAML file to another which keys have had their texts changed.
 
 Installation
 =========

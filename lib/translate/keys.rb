@@ -28,6 +28,33 @@ class Translate::Keys
   
   # Convert something like:
   # 
+  # {
+  #  :pressrelease => {
+  #    :label => {
+  #      :one => "Pressmeddelande"
+  #    }
+  #   }
+  # }
+  # 
+  # to:
+  # 
+  #  {'pressrelease.label.one' => "Pressmeddelande"}
+  #
+  def self.to_shallow_hash(hash)
+    hash.inject({}) do |shallow_hash, (key, value)|
+      if value.is_a?(Hash)
+        to_shallow_hash(value).each do |sub_key, sub_value|
+          shallow_hash[[key, sub_key].join(".")] = sub_value
+        end
+      else
+        shallow_hash[key.to_s] = value
+      end
+      shallow_hash
+    end
+  end
+  
+  # Convert something like:
+  # 
   #  {'pressrelease.label.one' => "Pressmeddelande"}
   # 
   # to:
@@ -41,7 +68,7 @@ class Translate::Keys
   # }
   def self.to_deep_hash(hash)    
     hash.inject({}) do |deep_hash, (key, value)|
-      keys = key.split('.').reverse
+      keys = key.to_s.split('.').reverse
       leaf_key = keys.shift
       key_hash = keys.inject({leaf_key.to_sym => value}) { |hash, key| {key.to_sym => hash} }
       deep_merge!(deep_hash, key_hash)

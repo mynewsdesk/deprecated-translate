@@ -53,21 +53,13 @@ describe Translate::Keys do
 
   describe "to_deep_hash" do
     it "convert shallow hash with dot separated keys to deep hash" do
-      Translate::Keys.to_deep_hash({
-        'pressrelease.label.one' => "Pressmeddelande",
-        'pressrelease.label.other' => "Pressmeddelanden",
-        'article' => "Artikel",
-        'category' => ''
-      }).should == {
-        :pressrelease => {
-          :label => {
-            :one => "Pressmeddelande",
-            :other => "Pressmeddelanden"
-          }
-        },
-        :article => "Artikel",
-        :category => ''
-      }
+      Translate::Keys.to_deep_hash(shallow_hash).should == deep_hash
+    end
+  end
+  
+  describe "to_shallow_hash" do
+    it "converts a deep hash to a shallow one" do
+      Translate::Keys.to_shallow_hash(deep_hash).should == shallow_hash
     end
   end
 
@@ -76,6 +68,28 @@ describe Translate::Keys do
   # Helper Methods
   #
   ##########################################################################
+  
+  def shallow_hash
+    {
+      'pressrelease.label.one' => "Pressmeddelande",
+      'pressrelease.label.other' => "Pressmeddelanden",
+      'article' => "Artikel",
+      'category' => ''
+    }    
+  end
+  
+  def deep_hash
+    {
+      :pressrelease => {
+        :label => {
+          :one => "Pressmeddelande",
+          :other => "Pressmeddelanden"
+        }
+      },
+      :article => "Artikel",
+      :category => ''
+    }    
+  end
   
   def i18n_files_dir
     File.join(File.dirname(__FILE__), "files", "translate")
