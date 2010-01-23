@@ -60,6 +60,24 @@ namespace :translate do
     end
   end
 
+  desc "Remove all translation texts that are no longer present in the locale they were translated from"
+  task :remove_obsolete_keys => :environment do
+    I18n.backend.send(:init_translations)
+    master_locale = ENV['LOCALE'] || I18n.default_locale
+    translated_locales = I18n.available_locales.reject { |locale| [:root, I18n.default_locale.to_sym].include?(locale) }    
+    translated_locales.each do |locale|
+      texts = {}
+      Translate::Keys.new.i18n_keys(locale).each do |key|
+        if I18n.backend.send(:lookup, master_locale, key).to_s.present?
+          texts[key] = I18n.backend.send(:lookup, locale, key)
+        end
+      end
+      I18n.backend.send(:translations)[locale] = nil # Clear out all current translations
+      I18n.backend.store_translations(locale, Translate::Keys.to_deep_hash(texts))
+      Translate::Storage.new(locale).write_to_file      
+    end
+  end
+
   desc "Merge I18n keys from log/translations.yml into config/locales/*.yml (for use with the Rails I18n TextMate bundle)"
   task :merge_keys => :environment do
     I18n.backend.send(:init_translations)
