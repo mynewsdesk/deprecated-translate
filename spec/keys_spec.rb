@@ -92,6 +92,6 @@ describe Translate::Keys do
   end
   
   def i18n_files_dir
-    File.join(File.dirname(__FILE__), "files", "translate")
+    File.join(ENV['PWD'], "spec", "files", "translate")
   end
 end
