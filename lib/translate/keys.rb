@@ -23,7 +23,7 @@ class Translate::Keys
 
   def i18n_keys(locale)
     I18n.backend.send(:init_translations) unless I18n.backend.initialized?
-    extract_i18n_keys(I18n.backend.send(:translations)[locale.to_sym]).sort
+    Translate::Keys.to_shallow_hash(I18n.backend.send(:translations)[locale.to_sym]).keys.sort
   end
 
   def untranslated_keys
@@ -106,20 +106,6 @@ class Translate::Keys
 
   private
 
-  def extract_i18n_keys(hash, parent_keys = [])
-    hash.inject([]) do |keys, (key, value)|
-      full_key = parent_keys + [key]
-      if value.is_a?(Hash)
-        # Nested hash
-        keys += extract_i18n_keys(value, full_key)
-      elsif value.present?
-        # String leaf node
-        keys << full_key.join(".")
-      end
-      keys
-    end
-  end
-  
   def extract_files
     files_to_scan.inject(HashWithIndifferentAccess.new) do |files, file|
       IO.read(file).scan(i18n_lookup_pattern).flatten.map(&:to_sym).each do |key|

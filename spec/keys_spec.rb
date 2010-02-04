@@ -28,7 +28,7 @@ describe Translate::Keys do
     
     it "should return all keys in the I18n backend translations hash" do
       I18n.backend.should_receive(:translations).and_return(translations)
-      @keys.i18n_keys(:en).should == ['articles.new.page_title', 'categories.flash.created', 'home.about']
+      @keys.i18n_keys(:en).should == ['articles.new.page_title', 'categories.flash.created', 'empty', 'home.about']
     end
     
   describe "untranslated_keys" do
@@ -38,7 +38,7 @@ describe Translate::Keys do
     
     it "should return a hash with keys with missing translations in each locale" do
       @keys.untranslated_keys.should == {
-        :sv => ['articles.new.page_title', 'categories.flash.created']
+        :sv => ['articles.new.page_title', 'categories.flash.created', 'empty']
       }
     end
   end

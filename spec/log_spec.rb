@@ -7,7 +7,7 @@ describe Translate::Log do
       I18n.locale = :sv
       I18n.backend.store_translations(:sv, from_texts)
       keys = Translate::Keys.new
-      @log = Translate::Log.new(:sv, :en, keys.send(:extract_i18n_keys, from_texts))
+      @log = Translate::Log.new(:sv, :en, Translate::Keys.to_shallow_hash(from_texts).keys)
       @log.stub!(:file_path).and_return(file_path)
       FileUtils.rm_f file_path
     end

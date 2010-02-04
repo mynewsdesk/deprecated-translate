@@ -82,7 +82,7 @@ namespace :translate do
     locale = new_translations.keys.first
 
     overwrites = false
-    Translate::Keys.new.send(:extract_i18n_keys, new_translations[locale]).each do |key|
+    Translate::Keys.to_shallow_hash(new_translations[locale]).keys.each do |key|
       new_text = key.split(".").inject(new_translations[locale]) { |hash, sub_key| hash[sub_key] }
       existing_text = I18n.backend.send(:lookup, locale.to_sym, key)
       if existing_text && new_text != existing_text        
