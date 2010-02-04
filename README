@@ -19,6 +19,7 @@ Rake Tasks
 
 In addition to the web UI this plugin adds the following rake tasks:
 
+translate:untranslated
 translate:lost_in_translation
 translate:remove_obsolete_keys
 translate:merge_keys

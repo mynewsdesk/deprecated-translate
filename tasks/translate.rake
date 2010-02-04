@@ -33,6 +33,22 @@ class Hash
 end
 
 namespace :translate do
+  desc "Show untranslated keys for locale LOCALE"
+  task :untranslated => :environment do
+    from_locale = I18n.default_locale
+    untranslated = Translate::Keys.new.untranslated_keys
+    if untranslated.present?
+      untranslated.each do |locale, keys|
+        keys.each do |key|
+          from_text = I18n.backend.send(:lookup, from_locale, key)
+          puts "#{locale}.#{key} (#{from_locale}.#{key}='#{from_text}')"
+        end
+      end
+    else
+      puts "No untranslated keys"
+    end
+  end
+  
   desc "Show I18n keys that are missing in the config/locales/default_locale.yml YAML file"
   task :lost_in_translation => :environment do
     LOCALE = I18n.default_locale
@@ -64,8 +80,7 @@ namespace :translate do
   task :remove_obsolete_keys => :environment do
     I18n.backend.send(:init_translations)
     master_locale = ENV['LOCALE'] || I18n.default_locale
-    translated_locales = I18n.available_locales.reject { |locale| [:root, I18n.default_locale.to_sym].include?(locale) }    
-    translated_locales.each do |locale|
+    Translate::Keys.translated_locales.each do |locale|
       texts = {}
       Translate::Keys.new.i18n_keys(locale).each do |key|
         if I18n.backend.send(:lookup, master_locale, key).to_s.present?

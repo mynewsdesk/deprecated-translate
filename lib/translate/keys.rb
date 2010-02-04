@@ -25,6 +25,19 @@ class Translate::Keys
     I18n.backend.send(:init_translations) unless I18n.backend.initialized?
     extract_i18n_keys(I18n.backend.send(:translations)[locale.to_sym]).sort
   end
+
+  def untranslated_keys
+    Translate::Keys.translated_locales.inject({}) do |missing, locale|
+      missing[locale] = i18n_keys(I18n.default_locale).map do |key|
+        I18n.backend.send(:lookup, locale, key) ? nil : key
+      end.compact
+      missing
+    end
+  end
+
+  def self.translated_locales
+    I18n.available_locales.reject { |locale| [:root, I18n.default_locale.to_sym].include?(locale) }        
+  end
   
   # Convert something like:
   # 

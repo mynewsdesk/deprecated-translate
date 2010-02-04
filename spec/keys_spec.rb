@@ -29,28 +29,30 @@ describe Translate::Keys do
       @keys.i18n_keys(:en).should == ['articles.new.page_title', 'categories.flash.created', 'home.about']
     end
     
-    def translations
-      {
-        :en => {
-          :home => {
-            :about => "This site is about making money"
-          },
-          :articles => {
-           :new => {
-             :page_title => "New Article"
-            }
-          },
-          :categories => {
-            :flash => {
-             :created => "Category created"  
-            }
-          },
-          :empty => nil
-        }
+  describe "untranslated_keys" do
+    before(:each) do
+      I18n.stub!(:default_locale).and_return(:en)      
+      I18n.backend.stub!(:translations).and_return(translations)
+    end
+    
+    it "should return a hash with keys with missing translations in each locale" do
+      Translate::Keys.new.untranslated_keys.should == {
+        :sv => ['articles.new.page_title', 'categories.flash.created']
       }
     end
   end
-
+  
+  describe "translated_locales" do
+    before(:each) do
+      I18n.stub!(:default_locale).and_return(:en)
+      I18n.stub!(:available_locales).and_return([:sv, :no, :en, :root])
+    end
+    
+    it "returns all avaiable except :root and the default" do
+      Translate::Keys.translated_locales.should == [:sv, :no]
+    end
+  end
+  
   describe "to_deep_hash" do
     it "convert shallow hash with dot separated keys to deep hash" do
       Translate::Keys.to_deep_hash(shallow_hash).should == deep_hash
@@ -68,6 +70,33 @@ describe Translate::Keys do
   # Helper Methods
   #
   ##########################################################################
+
+    def translations
+      {
+        :en => {
+          :home => {
+            :about => "This site is about making money"
+          },
+          :articles => {
+           :new => {
+             :page_title => "New Article"
+            }
+          },
+          :categories => {
+            :flash => {
+             :created => "Category created"  
+            }
+          },
+          :empty => nil
+        },
+        :sv => {
+          :home => {
+            :about => "Denna site handlar om att tjäna pengar"
+          }
+        }
+      }
+    end
+  end
   
   def shallow_hash
     {
