@@ -50,7 +50,7 @@ namespace :translate do
   end
   
   desc "Show I18n keys that are missing in the config/locales/default_locale.yml YAML file"
-  task :lost_in_translation => :environment do
+  task :missing => :environment do
     missing = Translate::Keys.new.missing_keys.inject([]) do |keys, (key, filename)|
       keys << "#{key} in \t  #{filename} is missing"
     end

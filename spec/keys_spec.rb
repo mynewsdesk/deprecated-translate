@@ -49,7 +49,7 @@ describe Translate::Keys do
       Translate::File.new(@file_path).write({
         :en => {
           :home => {
-            :page_title => "Welcome"
+            :page_title => false
           }
         }
       })
@@ -121,7 +121,7 @@ describe Translate::Keys do
         },
         :sv => {
           :home => {
-            :about => "Denna site handlar om att tjäna pengar"
+            :about => false
           }
         }
       }

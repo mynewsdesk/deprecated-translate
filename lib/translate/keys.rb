@@ -29,7 +29,7 @@ class Translate::Keys
   def untranslated_keys
     Translate::Keys.translated_locales.inject({}) do |missing, locale|
       missing[locale] = i18n_keys(I18n.default_locale).map do |key|
-        I18n.backend.send(:lookup, locale, key) ? nil : key
+        I18n.backend.send(:lookup, locale, key).nil? ? key : nil
       end.compact
       missing
     end
@@ -41,7 +41,7 @@ class Translate::Keys
       keys = keys.deep_merge(Translate::File.new(path).read[locale.to_s])
     end
     yaml_keys = Translate::Keys.to_shallow_hash(yaml_keys)
-    files.reject { |key, file| yaml_keys[key.to_s] }
+    files.reject { |key, file| !yaml_keys[key.to_s].nil? }
   end
 
   def self.translated_locales
