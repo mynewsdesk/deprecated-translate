@@ -1,9 +1,11 @@
 require File.dirname(__FILE__) + '/spec_helper'
+require 'fileutils'
 
 describe Translate::Keys do
   before(:each) do
+    I18n.stub!(:default_locale).and_return(:en)      
     @keys = Translate::Keys.new
-    @keys.stub!(:files_root_dir).and_return(i18n_files_dir)
+    Translate::Storage.stub!(:root_dir).and_return(i18n_files_dir)
   end
   
   describe "to_a" do
@@ -31,13 +33,41 @@ describe Translate::Keys do
     
   describe "untranslated_keys" do
     before(:each) do
-      I18n.stub!(:default_locale).and_return(:en)      
       I18n.backend.stub!(:translations).and_return(translations)
     end
     
     it "should return a hash with keys with missing translations in each locale" do
-      Translate::Keys.new.untranslated_keys.should == {
+      @keys.untranslated_keys.should == {
         :sv => ['articles.new.page_title', 'categories.flash.created']
+      }
+    end
+  end
+  
+  describe "missing_keys" do
+    before(:each) do
+      @file_path = File.join(i18n_files_dir, "config", "locales", "en.yml")
+      Translate::File.new(@file_path).write({
+        :en => {
+          :home => {
+            :page_title => "Welcome"
+          }
+        }
+      })
+    end
+    
+    after(:each) do
+      FileUtils.rm(@file_path)
+    end
+    
+    it "should return a hash with keys that are not in the locale file" do
+      @keys.stub!(:files).and_return({
+        :'home.page_title' => "app/views/home/index.rhtml",
+        :'home.signup' => "app/views/home/_signup.rhtml",
+        :'about.index.page_title' => "app/views/about/index.rhtml"
+      })
+      @keys.missing_keys.should == {
+        :'home.signup' => "app/views/home/_signup.rhtml",
+        :'about.index.page_title' => "app/views/about/index.rhtml"        
       }
     end
   end

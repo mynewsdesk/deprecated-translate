@@ -35,6 +35,15 @@ class Translate::Keys
     end
   end
 
+  def missing_keys
+    locale = I18n.default_locale; yaml_keys = {}
+    yaml_keys = Translate::Storage.file_paths(locale).inject({}) do |keys, path|
+      keys = keys.deep_merge(Translate::File.new(path).read[locale.to_s])
+    end
+    yaml_keys = Translate::Keys.to_shallow_hash(yaml_keys)
+    files.reject { |key, file| yaml_keys[key.to_s] }
+  end
+
   def self.translated_locales
     I18n.available_locales.reject { |locale| [:root, I18n.default_locale.to_sym].include?(locale) }        
   end
@@ -96,6 +105,7 @@ class Translate::Keys
   end
 
   private
+
   def extract_i18n_keys(hash, parent_keys = [])
     hash.inject([]) do |keys, (key, value)|
       full_key = parent_keys + [key]
@@ -126,11 +136,7 @@ class Translate::Keys
   end
 
   def files_to_scan
-    Dir.glob(File.join(files_root_dir, "{app,config,lib}", "**","*.{rb,erb,rhtml}")) +
-      Dir.glob(File.join(files_root_dir, "public", "javascripts", "**","*.js"))
-  end
-  
-  def files_root_dir
-    Rails.root
+    Dir.glob(File.join(Translate::Storage.root_dir, "{app,config,lib}", "**","*.{rb,erb,rhtml}")) +
+      Dir.glob(File.join(Translate::Storage.root_dir, "public", "javascripts", "**","*.js"))
   end
 end

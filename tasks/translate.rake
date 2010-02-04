@@ -51,29 +51,10 @@ namespace :translate do
   
   desc "Show I18n keys that are missing in the config/locales/default_locale.yml YAML file"
   task :lost_in_translation => :environment do
-    LOCALE = I18n.default_locale
-    keys = []; result = []; locale_hash = {}
-    Dir.glob(File.join("config", "locales", "**","#{LOCALE}.yml")).each do |locale_file_name|
-      locale_hash = locale_hash.deep_merge(YAML::load(File.open(locale_file_name))[LOCALE])
+    missing = Translate::Keys.new.missing_keys.inject([]) do |keys, (key, filename)|
+      keys << "#{key} in \t  #{filename} is missing"
     end
-    lookup_pattern = Translate::Keys.new.send(:i18n_lookup_pattern)
-    Dir.glob(File.join("app", "**","*.{rb,rhtml}")).each do |file_name|
-      File.open(file_name, "r+").each do |line|
-        line.scan(lookup_pattern) do |key_string|
-          result << "#{key_string} in \t  #{file_name} is not in any locale file" unless key_exist?(key_string.first.split("."), locale_hash)
-        end
-      end
-    end
-    puts !result.empty? ? result.join("\n") : "No missing translations for locale: #{LOCALE}"
-  end
-
-  def key_exist?(key_arr,locale_hash)
-    key = key_arr.slice!(0)
-    if key
-      key_exist?(key_arr, locale_hash[key]) if (locale_hash && locale_hash.include?(key))
-    elsif locale_hash
-      true
-    end
+    puts missing.present? ? missing.join("\n") : "No missing translations in the default locale file"
   end
 
   desc "Remove all translation texts that are no longer present in the locale they were translated from"
