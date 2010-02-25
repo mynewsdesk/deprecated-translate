@@ -37,13 +37,17 @@ namespace :translate do
   task :untranslated => :environment do
     from_locale = I18n.default_locale
     untranslated = Translate::Keys.new.untranslated_keys
-    if untranslated.present?
-      untranslated.each do |locale, keys|
-        keys.each do |key|
-          from_text = I18n.backend.send(:lookup, from_locale, key)
-          puts "#{locale}.#{key} (#{from_locale}.#{key}='#{from_text}')"
-        end
+
+    messages = []
+    untranslated.each do |locale, keys|
+      keys.each do |key|
+        from_text = I18n.backend.send(:lookup, from_locale, key)
+        messages << "#{locale}.#{key} (#{from_locale}.#{key}='#{from_text}')"
       end
+    end
+      
+    if messages.present?
+      messages.each { |m| puts m }
     else
       puts "No untranslated keys"
     end
