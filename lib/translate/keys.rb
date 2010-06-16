@@ -40,12 +40,36 @@ class Translate::Keys
     yaml_keys = Translate::Storage.file_paths(locale).inject({}) do |keys, path|
       keys = keys.deep_merge(Translate::File.new(path).read[locale.to_s])
     end
-    yaml_keys = Translate::Keys.to_shallow_hash(yaml_keys)
-    files.reject { |key, file| !yaml_keys[key.to_s].nil? }
+    files.reject { |key, file| self.class.contains_key?(yaml_keys, key) }
   end
 
   def self.translated_locales
     I18n.available_locales.reject { |locale| [:root, I18n.default_locale.to_sym].include?(locale) }        
+  end
+
+  # Checks if a nested hash contains the keys in dot separated I18n key.
+  #
+  # Example:
+  #
+  # hash = {
+  #   :foo => {
+  #     :bar => {
+  #       :baz => 1
+  #     }
+  #   }
+  # }
+  #
+  # contains_key?("foo", key) # => true
+  # contains_key?("foo.bar", key) # => true
+  # contains_key?("foo.bar.baz", key) # => true
+  # contains_key?("foo.bar.baz.bla", key) # => false
+  #
+  def self.contains_key?(hash, key)
+    keys = key.to_s.split(".")
+    return false if keys.empty?
+    !keys.inject(HashWithIndifferentAccess.new(hash)) do |memo, key|
+      memo.is_a?(Hash) ? memo.try(:[], key) : nil
+    end.nil?
   end
   
   # Convert something like:

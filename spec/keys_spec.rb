@@ -49,7 +49,11 @@ describe Translate::Keys do
       Translate::File.new(@file_path).write({
         :en => {
           :home => {
-            :page_title => false
+            :page_title => false,
+            :intro => {
+              :one => "intro one",
+              :other => "intro other"
+            }
           }
         }
       })
@@ -62,6 +66,7 @@ describe Translate::Keys do
     it "should return a hash with keys that are not in the locale file" do
       @keys.stub!(:files).and_return({
         :'home.page_title' => "app/views/home/index.rhtml",
+        :'home.intro' => 'app/views/home/index.rhtml',
         :'home.signup' => "app/views/home/_signup.rhtml",
         :'about.index.page_title' => "app/views/about/index.rhtml"
       })
@@ -69,6 +74,24 @@ describe Translate::Keys do
         :'home.signup' => "app/views/home/_signup.rhtml",
         :'about.index.page_title' => "app/views/about/index.rhtml"        
       }
+    end
+  end
+
+  describe "contains_key?" do
+    it "works" do
+      hash = {
+        :foo => {
+          :bar => {
+            :baz => false
+          }
+        }
+      }
+      Translate::Keys.contains_key?(hash, "").should be_false
+      Translate::Keys.contains_key?(hash, "foo").should be_true
+      Translate::Keys.contains_key?(hash, "foo.bar").should be_true
+      Translate::Keys.contains_key?(hash, "foo.bar.baz").should be_true
+      Translate::Keys.contains_key?(hash, :"foo.bar.baz").should be_true
+      Translate::Keys.contains_key?(hash, "foo.bar.baz.bla").should be_false
     end
   end
   
