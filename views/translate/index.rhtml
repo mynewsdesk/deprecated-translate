@@ -8,10 +8,10 @@
 	<legend>Search filter</legend>
 	<div id="show-sort">
 		<p>
-		 <label>Show:</label> <%=  simple_filter(show_filters) %>
+		 <label>Show:</label> <%=  simple_filter(show_filters).html_safe %>
 		</p>
 		<p>
-		 <label>Sort by:</label> <%= simple_filter(["key", "text"], 'sort_by') %>
+		 <label>Sort by:</label> <%= simple_filter(["key", "text"], 'sort_by').html_safe %>
 		</p>
 	</div>
   <% form_tag(params, :method => :get) do %>
