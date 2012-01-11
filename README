@@ -38,7 +38,7 @@ Installation
 =========
 Obtain the source with:
 
-./script/plugin install git://github.com/newsdesk/translate.git 
+./script/plugin install git://github.com/mynewsdesk/translate.git 
 
 To mount the plugin, add the following to your config/routes.rb file:
 
